@@ -73,6 +73,7 @@
                                     <field name="question_type" />
                                     <field name="possible_ql_values" invisible="1" />
                                     <field name="qualitative_value"
+                                           options="{'no_open':True,'no_create_edit':True}"
                                            attrs="{'readonly': [('question_type', '=', 'quantitative')]}" />
                                     <field name="quantitative_value"
                                            attrs="{'readonly': [('question_type', '=', 'qualitative')]}" />

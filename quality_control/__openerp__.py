@@ -3,6 +3,7 @@
 # Copyright 2014 Serv. Tec. Avanzados - Pedro M. Baeza
 # Copyright 2014 Oihane Crucelaegui - AvanzOSC
 # Copyright 2017 Eficent Business and IT Consulting Services S.L.
+# Copyright 2017 Fábrica de Software Libre - Daniel Alejandro Mendieta
 # License AGPL-3.0 or later (http://www.gnu.org/licenses/agpl).
 
 {
@@ -14,6 +15,7 @@
               "AvanzOSC, "
               "Serv. Tecnol. Avanzados - Pedro M. Baeza, "
               "Eficent, "
+              "Fábrica de Software Libre, "
               "Odoo Community Association (OCA)",
     "website": "http://www.odoomrp.com",
     "depends": [
