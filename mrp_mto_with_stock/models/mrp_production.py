@@ -48,7 +48,7 @@ class MrpProduction(models.Model):
                             restrict_partner_id=move.restrict_partner_id)
                         new_move = move_obj.browse(new_move_id)
                         move._action_assign()
-                    elif qty_to_procure > 0.0:
+                    elif qty_to_procure:
                         new_move = move
                 elif move.state in ('partially_available', 'confirmed') \
                         and move.procure_method == 'make_to_stock' \
@@ -56,7 +56,7 @@ class MrpProduction(models.Model):
                         move.location_id in \
                         move.product_id.mrp_mts_mto_location_ids:
                     qty_to_procure = production.get_mto_qty_to_procure(move)
-                    if qty_to_procure > 0.0:
+                    if qty_to_procure:
                         new_move = move
                     else:
                         continue
