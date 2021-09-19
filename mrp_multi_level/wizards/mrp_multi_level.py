@@ -689,7 +689,8 @@ class MultiLevelMrp(models.TransientModel):
         action_dates = planned_order_obj.search(
             [("product_mrp_area_id", "=", product_mrp_area.id)], order="due_date"
         ).mapped("due_date")
-        mrp_dates = set(moves_dates + action_dates)
+
+        mrp_dates = set(moves_dates + action_dates + [fields.Date.today()])
         on_hand_qty = product_mrp_area.product_id.with_context(
             location=product_mrp_area.mrp_area_id.location_id.id
         )._product_available()[product_mrp_area.product_id.id]["qty_available"]

@@ -23,7 +23,10 @@ class ProductMRPArea(models.Model):
         store=True,
     )
     product_id = fields.Many2one(
-        comodel_name="product.product", required=True, string="Product"
+        comodel_name="product.product",
+        required=True,
+        string="Product",
+        ondelete="cascade",
     )
     product_tmpl_id = fields.Many2one(
         comodel_name="product.template",
