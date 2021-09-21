@@ -55,3 +55,11 @@ class StockMove(models.Model):
             owner_id=owner_id,
             strict=strict,
         )
+
+    def _prepare_move_line_vals(self, quantity=None, reserved_quant=None):
+        vals = super()._prepare_move_line_vals(
+            quantity=quantity, reserved_quant=reserved_quant
+        )
+        if self.repair_line_id and self.repair_line_id.lot_id:
+            vals["lot_id"] = self.repair_line_id.lot_id.id
+        return vals
