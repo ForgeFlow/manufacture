@@ -886,3 +886,16 @@ class TestMrpMultiLevel(TestMrpMultiLevelCommon):
         )
         self.assertEqual(len(pp_3_planned_orders), 1)
         self.assertEqual(pp_3_planned_orders.mrp_qty, 10)
+        sf3_planned_orders = self.env["mrp.planned.order"].search(
+            [("product_id", "=", self.sf_3.id)]
+        )
+        self.assertEqual(len(sf3_planned_orders), 1)
+        # Trying to procure a kit planned order will have no effect.
+        procure_wizard = (
+            self.env["mrp.inventory.procure"]
+            .with_context(
+                active_model="mrp.planned.order", active_ids=sf3_planned_orders.ids
+            )
+            .create({})
+        )
+        self.assertEqual(len(procure_wizard.item_ids), 0)
