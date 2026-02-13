@@ -20,7 +20,6 @@ class MRPArea(models.Model):
                 "ignore_overlapping",
                 "Ignore other sources during periods with estimates",
             ),
-            ("ignore_estimates", "Ignore estimates"),
         ],
         default="all",
         help="Define the strategy to follow in MRP multi level when there is a"
@@ -33,6 +32,5 @@ class MRPArea(models.Model):
         "* Ignore other sources during periods with estimates: When "
         "you create demand estimates for a period and product, "
         "other sources of demand will be ignored during that period "
-        "for those products.\n"
-        "* Ignore estimates: Completely ignore demand estimates.",
+        "for those products.",
     )

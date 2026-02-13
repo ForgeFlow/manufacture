@@ -2,7 +2,3 @@
 
   * Víctor Martínez
   * Pedro M. Baeza
-
-* `ForgeFlow <https://forgeflow.com>`_:
-
-  * Marina Alapont

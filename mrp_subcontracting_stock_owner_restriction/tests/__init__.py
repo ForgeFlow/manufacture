@@ -1,1 +1,0 @@
-from . import test_mrp_subcontracting_stock_owner_restriction

@@ -17,60 +17,42 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || "
-"n%100==4 ? 2 : 3);\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 0 : n%100==2 ? 1 : n%100==3 || n"
+"%100==4 ? 2 : 3);\n"
 "X-Generator: Poedit 2.0.6\n"
 
 #. module: quality_control_stock_oca
-#. odoo-python
-#: code:addons/quality_control_stock_oca/models/stock_picking.py:0
-#, python-format
-msgid "Control quality is required to validate this Transfert."
-msgstr ""
-
-#. module: quality_control_stock_oca
-#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_lot__created_inspections
 #: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_picking__created_inspections
+#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_production_lot__created_inspections
 msgid "Created inspections"
 msgstr "Ustvarjene inšpekcije"
 
 #. module: quality_control_stock_oca
-#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_lot__done_inspections
 #: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_picking__done_inspections
-#: model_terms:ir.ui.view,arch_db:quality_control_stock_oca.stock_picking_qc_view
+#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_production_lot__done_inspections
 msgid "Done inspections"
 msgstr "Opravljene inšpekcije"
 
 #. module: quality_control_stock_oca
-#: model_terms:ir.ui.view,arch_db:quality_control_stock_oca.stock_picking_qc_view
-msgid "Failed inspections"
-msgstr ""
-
-#. module: quality_control_stock_oca
-#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_picking__inspection_required_message
-msgid "Inspection Required Message"
-msgstr ""
-
-#. module: quality_control_stock_oca
-#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_lot__qc_inspections_ids
 #: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_picking__qc_inspections_ids
+#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_production_lot__qc_inspections_ids
 msgid "Inspections"
 msgstr "Inšpekcije"
 
 #. module: quality_control_stock_oca
-#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_lot__passed_inspections
 #: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_picking__passed_inspections
+#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_production_lot__passed_inspections
 msgid "Inspections OK"
 msgstr "Uspešne inšpekcije"
 
 #. module: quality_control_stock_oca
-#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_lot__failed_inspections
 #: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_picking__failed_inspections
+#: model:ir.model.fields,field_description:quality_control_stock_oca.field_stock_production_lot__failed_inspections
 msgid "Inspections failed"
 msgstr "Neuspešne inšpekcije"
 
 #. module: quality_control_stock_oca
-#: model:ir.model.fields,help:quality_control_stock_oca.field_stock_lot__qc_inspections_ids
+#: model:ir.model.fields,help:quality_control_stock_oca.field_stock_production_lot__qc_inspections_ids
 msgid "Inspections related to this lot."
 msgstr "Inšpekcije vezane na ta lot."
 
@@ -78,12 +60,6 @@ msgstr "Inšpekcije vezane na ta lot."
 #: model:ir.model.fields,help:quality_control_stock_oca.field_stock_picking__qc_inspections_ids
 msgid "Inspections related to this picking."
 msgstr "Inšpekcije vezane na ta zbirnik."
-
-#. module: quality_control_stock_oca
-#: model:ir.model.fields,field_description:quality_control_stock_oca.field_qc_inspection__is_mandatory_to_validate
-#: model:ir.model.fields,field_description:quality_control_stock_oca.field_qc_trigger__is_mandatory_to_validate
-msgid "Is Mandatory To Validate"
-msgstr ""
 
 #. module: quality_control_stock_oca
 #: model:ir.model.fields,field_description:quality_control_stock_oca.field_qc_inspection__lot_id
@@ -94,14 +70,9 @@ msgid "Lot"
 msgstr "Lot"
 
 #. module: quality_control_stock_oca
-#: model:ir.model,name:quality_control_stock_oca.model_stock_lot
+#: model:ir.model,name:quality_control_stock_oca.model_stock_production_lot
 msgid "Lot/Serial"
 msgstr "Lot/serijska št."
-
-#. module: quality_control_stock_oca
-#: model_terms:ir.ui.view,arch_db:quality_control_stock_oca.stock_picking_qc_view
-msgid "Passed inspections"
-msgstr ""
 
 #. module: quality_control_stock_oca
 #: model:ir.model.fields,field_description:quality_control_stock_oca.field_qc_inspection__picking_id
@@ -174,21 +145,8 @@ msgid "Quality inspections from picking failed"
 msgstr "Neuspešne inšpekcije kakovosti na zbirniku"
 
 #. module: quality_control_stock_oca
-#: model:ir.model,name:quality_control_stock_oca.model_stock_move
-msgid "Stock Move"
-msgstr ""
-
-#. module: quality_control_stock_oca
 #: model:ir.model,name:quality_control_stock_oca.model_stock_picking
 msgid "Transfer"
-msgstr ""
-
-#. module: quality_control_stock_oca
-#. odoo-python
-#: code:addons/quality_control_stock_oca/models/stock_picking.py:0
-#, python-format
-msgid ""
-"You must validate the following inspections before validating the picking:\n"
 msgstr ""
 
 #. module: quality_control_stock_oca

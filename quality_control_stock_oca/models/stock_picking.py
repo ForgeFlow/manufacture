@@ -1,10 +1,11 @@
 # Copyright 2014 Serv. Tec. Avanzados - Pedro M. Baeza
 # Copyright 2018 Simone Rubino - Agile Business Group
 # Copyright 2019 Andrii Skrypka
-# Copyright 2024 Quartile
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl).
 
-from odoo import _, api, fields, models
+from odoo import api, fields, models
+
+from odoo.addons.quality_control_oca.models.qc_trigger_line import _filter_trigger_lines
 
 
 class StockPicking(models.Model):
@@ -29,22 +30,6 @@ class StockPicking(models.Model):
     failed_inspections = fields.Integer(
         compute="_compute_count_inspections", string="Inspections failed"
     )
-
-    inspection_required_message = fields.Html(
-        readonly=True, compute="_compute_inspection_required_message"
-    )
-
-    @api.depends("qc_inspections_ids")
-    def _compute_inspection_required_message(self):
-        message = _("Control quality is required to validate this Transfert.")
-        for rec in self.sudo():
-            if rec.qc_inspections_ids and rec.qc_inspections_ids.filtered(
-                lambda x: x.state not in ["success", "failed"]
-                and x.is_mandatory_to_validate
-            ):
-                rec.inspection_required_message = message
-            else:
-                rec.inspection_required_message = False
 
     @api.depends("qc_inspections_ids", "qc_inspections_ids.state")
     def _compute_count_inspections(self):
@@ -71,52 +56,29 @@ class StockPicking(models.Model):
                 picking.passed_inspections + picking.failed_inspections
             )
 
-    def trigger_inspections(self, timings):
-        """Triggers the creation of or an update on inspections for attached stock moves
-
-        :param: timings: list of timings among 'before', 'after' and 'plan_ahead'
-        """
-        self.ensure_one()
-        moves_with_inspections = self.env["stock.move"]
-        existing_inspections = self.env["qc.inspection"]._get_existing_inspections(
-            self.move_ids
-        )
-        for inspection in existing_inspections:
-            inspection.onchange_object_id()
-            moves_with_inspections += inspection.object_id
-        for operation in self.move_ids - moves_with_inspections:
-            operation.trigger_inspection(timings, self.partner_id)
-
-    def action_cancel(self):
-        res = super().action_cancel()
-        self.sudo().qc_inspections_ids.filtered(
-            lambda x: x.state == "plan"
-        ).action_cancel()
-        return res
-
     def _action_done(self):
-        for picking in self:
-            picking_names = ""
-            if picking.inspection_required_message:
-                picking_names += f"- {picking.name}\n"
-            if picking_names:
-                raise models.UserError(
-                    _(
-                        "You must validate the following inspections "
-                        "before validating the picking:\n" + picking_names
+        res = super()._action_done()
+        inspection_model = self.env["qc.inspection"].sudo()
+        qc_trigger = (
+            self.env["qc.trigger"]
+            .sudo()
+            .search([("picking_type_id", "=", self.picking_type_id.id)])
+        )
+        for operation in self.move_ids:
+            trigger_lines = set()
+            for model in [
+                "qc.trigger.product_category_line",
+                "qc.trigger.product_template_line",
+                "qc.trigger.product_line",
+            ]:
+                partner = self.partner_id if qc_trigger.partner_selectable else False
+                trigger_lines = trigger_lines.union(
+                    self.env[model]
+                    .sudo()
+                    .get_trigger_line_for_product(
+                        qc_trigger, operation.product_id.sudo(), partner=partner
                     )
                 )
-        res = super()._action_done()
-        plan_inspections = self.sudo().qc_inspections_ids.filtered(
-            lambda x: x.state == "plan"
-        )
-        plan_inspections.write({"state": "ready", "date": fields.Datetime.now()})
-        for picking in self:
-            picking.trigger_inspections(["after"])
-        return res
-
-    def _create_backorder(self):
-        res = super()._create_backorder()
-        # To re-allocate backorder moves to the new backorder picking
-        self.sudo().qc_inspections_ids._compute_picking()
+            for trigger_line in _filter_trigger_lines(trigger_lines):
+                inspection_model._make_inspection(operation, trigger_line)
         return res

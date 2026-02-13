@@ -38,24 +38,8 @@ class QcTriggerLine(models.AbstractModel):
         " created.",
         domain="[('parent_id', '=', False)]",
     )
-    timing = fields.Selection(
-        selection=[
-            ("before", "Before"),
-            ("after", "After"),
-            ("plan_ahead", "Plan Ahead"),
-        ],
-        default="after",
-        help="* Before: An executable inspection is generated before the record "
-        "related to the trigger is completed (e.g. when picking is confirmed).\n"
-        "* After: An executable inspection is generated when the record related to the "
-        "trigger is completed (e.g. when picking is done).\n"
-        "* Plan Ahead: A non-executable inspection is generated before the record "
-        "related to the trigger is completed (e.g. when picking is confirmed), and the "
-        "inspection becomes executable when the record related to the trigger is "
-        "completed (e.g. when picking is done).",
-    )
 
-    def get_trigger_line_for_product(self, trigger, timings, product, partner=False):
+    def get_trigger_line_for_product(self, trigger, product, partner=False):
         """Overridable method for getting trigger_line associated to a product.
         Each inherited model will complete this module to make the search by
         product, template or category.
@@ -65,14 +49,3 @@ class QcTriggerLine(models.AbstractModel):
         trigger.
         """
         return set()
-
-    def get_trigger_line_models(self):
-        """Overridable method for getting trigger_line models.
-        Each inherited model will complete this module to add the model to
-        the list returned so that it can be parsed each time a trigger is run.
-        """
-        return [
-            "qc.trigger.product_category_line",
-            "qc.trigger.product_template_line",
-            "qc.trigger.product_line",
-        ]

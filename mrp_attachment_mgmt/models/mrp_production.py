@@ -8,6 +8,3 @@ class MrpProduction(models.Model):
 
     def action_show_attachments(self):
         return self.product_id._action_show_attachments()
-
-    def action_show_bom_attachments(self):
-        return self.bom_id._action_show_attachments()

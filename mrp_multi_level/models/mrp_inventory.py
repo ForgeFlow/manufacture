@@ -48,12 +48,6 @@ class MrpInventory(models.Model):
     date = fields.Date()
     demand_qty = fields.Float(string="Demand")
     supply_qty = fields.Float(string="Supply")
-    rfq_qty = fields.Float(
-        string="RfQ",
-        help="Quantity on Request for Quotation.\n"
-        "This quantity is included in the supply quantity "
-        "but it is not confirmed yet.",
-    )
     initial_on_hand_qty = fields.Float(
         string="Starting Inventory", group_operator="avg"
     )
@@ -95,11 +89,8 @@ class MrpInventory(models.Model):
     @api.depends("planned_order_ids", "planned_order_ids.qty_released")
     def _compute_to_procure(self):
         for rec in self:
-            rec.to_procure = (
-                0.0
-                if rec.supply_method == "phantom"
-                else sum(rec.planned_order_ids.mapped("mrp_qty"))
-                - sum(rec.planned_order_ids.mapped("qty_released"))
+            rec.to_procure = sum(rec.planned_order_ids.mapped("mrp_qty")) - sum(
+                rec.planned_order_ids.mapped("qty_released")
             )
 
     @api.depends(
@@ -143,29 +134,3 @@ class MrpInventory(models.Model):
             "view_mode": "tree,form",
             "domain": domain,
         }
-
-    def action_open_rfqs(self):
-        self.ensure_one()
-        result = self.env["ir.actions.actions"]._for_xml_id("purchase.purchase_rfq")
-        rfq_move_domain = [
-            ("mrp_type", "=", "s"),
-            ("mrp_origin", "=", "po"),
-            ("purchase_order_id.state", "in", ["draft", "sent", "to approve"]),
-        ]
-        moves = self.product_mrp_area_id.mrp_move_ids.filtered_domain(rfq_move_domain)
-        if self.date == date.today():
-            moves = moves.filtered(
-                lambda m: m.purchase_line_id.date_planned.date() in [self.date, False]
-            )
-        else:
-            moves = moves.filtered(
-                lambda m: m.purchase_line_id.date_planned.date() == self.date
-            )
-        records = moves.mapped("purchase_order_id")
-        if len(records) != 1:
-            result["domain"] = [("id", "in", records.ids)]
-        else:
-            res = self.env.ref("purchase.purchase_order_form", False)
-            result["views"] = [(res and res.id or False, "form")]
-            result["res_id"] = records[0].id
-        return result

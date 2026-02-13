@@ -321,32 +321,25 @@ class TestMrpMultiLevel(TestMrpMultiLevelCommon):
             [("product_mrp_area_id.product_id", "=", self.product_4b.id)]
         )
         self.assertTrue(product_4b_demand)
-        self.assertEqual(product_4b_demand.to_procure, 100)
-        product_4c_demand = self.mrp_inventory_obj.search(
-            [("product_mrp_area_id.product_id", "=", self.product_4c.id)]
-        )
-        self.assertTrue(product_4c_demand)
-        self.assertEqual(product_4c_demand.to_procure, 1)
-        # Testing variant BoM
-        # Supply of one unit for AV-12 or AV-21
+        self.assertTrue(product_4b_demand.to_procure)
+        # No demand or supply for AV-12 or AV-21
         av_12_supply = self.mrp_inventory_obj.search(
             [("product_mrp_area_id.product_id", "=", self.av_12.id)]
         )
-        self.assertEqual(av_12_supply.to_procure, 1.0)
+        self.assertFalse(av_12_supply)
         av_21_supply = self.mrp_inventory_obj.search(
             [("product_mrp_area_id.product_id", "=", self.av_21.id)]
         )
-        self.assertEqual(av_21_supply.to_procure, 1.0)
-        # Testing template BoM
-        # Supply of 150 units for AV-11 and AV-22
+        self.assertFalse(av_21_supply)
+        # Supply for AV-11 and AV-22
         av_11_supply = self.mrp_inventory_obj.search(
             [("product_mrp_area_id.product_id", "=", self.av_11.id)]
         )
-        self.assertEqual(av_11_supply.to_procure, 100.0)
+        self.assertTrue(av_11_supply)
         av_22_supply = self.mrp_inventory_obj.search(
             [("product_mrp_area_id.product_id", "=", self.av_22.id)]
         )
-        self.assertTrue(av_22_supply.to_procure, 100.0)
+        self.assertTrue(av_22_supply)
 
     def test_13_timezone_handling(self):
         self.calendar.tz = "Australia/Sydney"  # Oct-Apr/Apr-Oct: UTC+11/UTC+10
@@ -393,11 +386,7 @@ class TestMrpMultiLevel(TestMrpMultiLevelCommon):
         )
         self.assertEqual(len(prod_uom_test_inventory_lines), 1)
         self.assertEqual(prod_uom_test_inventory_lines.supply_qty, 12.0)
-        # Supply qty has to be 12, a dozen of units are in a RFQ.
-        self.assertEqual(prod_uom_test_inventory_lines.rfq_qty, 12.0)
-        # check that the action opens the correct RfQ:
-        res = prod_uom_test_inventory_lines.action_open_rfqs()
-        self.assertEqual(res["res_id"], self.po_uom.id)
+        # Supply qty has to be 12 has a dozen of units are in a RFQ.
 
     def test_16_phantom_comp_planning(self):
         """
@@ -412,8 +401,11 @@ class TestMrpMultiLevel(TestMrpMultiLevelCommon):
         sf_3_planned_order_1 = self.planned_order_obj.search(
             [("product_mrp_area_id.product_id", "=", self.sf_3.id)]
         )
-        self.assertEqual(sf_3_planned_order_1.mrp_action, "phantom")
-        self.assertEqual(sf_3_planned_order_1.mrp_qty, 10.0)
+        self.assertEqual(len(sf_3_planned_order_1), 0)
+        sf_3_mrp_parameter = self.product_mrp_area_obj.search(
+            [("product_id", "=", self.sf_3.id)]
+        )
+        self.assertEqual(sf_3_mrp_parameter.supply_method, "phantom")
         # PP-3
         pp_3_line_1 = self.mrp_inventory_obj.search(
             [("product_mrp_area_id.product_id", "=", self.pp_3.id)]
@@ -453,16 +445,6 @@ class TestMrpMultiLevel(TestMrpMultiLevelCommon):
         ]
         product_mrp_area._compute_supply_method()
         self.assertEqual(product_mrp_area.supply_method, "buy")
-        kit_bom = self.mrp_bom_obj.create(
-            {
-                "product_tmpl_id": self.fp_4.product_tmpl_id.id,
-                "product_id": self.fp_4.id,
-                "type": "phantom",
-            }
-        )
-        product_mrp_area._compute_supply_method()
-        self.assertEqual(product_mrp_area.supply_method, "phantom")
-        self.assertEqual(product_mrp_area.supply_bom_id, kit_bom)
 
     def test_18_priorize_safety_stock(self):
         now = datetime.now()
@@ -870,53 +852,3 @@ class TestMrpMultiLevel(TestMrpMultiLevelCommon):
                     f"unexpected value for {key}: {inv[key]} "
                     f"(expected {test_vals[key]} on {inv.date})",
                 )
-
-    def test_25_phantom_comp_on_hand(self):
-        """
-        A phantom product with positive qty_available (which is computed from the
-        availability of its components) should not satisfy demand, because this leads
-        to double counting qty_available of its component products.
-        """
-        quant = self.quant_obj.sudo().create(
-            {
-                "product_id": self.pp_3.id,
-                "inventory_quantity": 10.0,
-                "location_id": self.stock_location.id,
-            }
-        )
-        quant.action_apply_inventory()
-        quant = self.quant_obj.sudo().create(
-            {
-                "product_id": self.pp_4.id,
-                "inventory_quantity": 30.0,
-                "location_id": self.stock_location.id,
-            }
-        )
-        quant.action_apply_inventory()
-        self.assertEqual(self.sf_3.qty_available, 10.0)
-        self.mrp_multi_level_wiz.create({}).run_mrp_multi_level()
-        # PP-3
-        pp_3_line_1 = self.mrp_inventory_obj.search(
-            [("product_mrp_area_id.product_id", "=", self.pp_3.id)]
-        )
-        self.assertEqual(len(pp_3_line_1), 1)
-        self.assertEqual(pp_3_line_1.demand_qty, 20.0)
-        self.assertEqual(pp_3_line_1.to_procure, 10.0)
-        pp_3_planned_orders = self.planned_order_obj.search(
-            [("product_mrp_area_id.product_id", "=", self.pp_3.id)]
-        )
-        self.assertEqual(len(pp_3_planned_orders), 1)
-        self.assertEqual(pp_3_planned_orders.mrp_qty, 10)
-        sf3_planned_orders = self.env["mrp.planned.order"].search(
-            [("product_id", "=", self.sf_3.id)]
-        )
-        self.assertEqual(len(sf3_planned_orders), 1)
-        # Trying to procure a kit planned order will have no effect.
-        procure_wizard = (
-            self.env["mrp.inventory.procure"]
-            .with_context(
-                active_model="mrp.planned.order", active_ids=sf3_planned_orders.ids
-            )
-            .create({})
-        )
-        self.assertEqual(len(procure_wizard.item_ids), 0)
