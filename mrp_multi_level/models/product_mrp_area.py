@@ -201,6 +201,12 @@ class ProductMRPArea(models.Model):
             rule = new_rule
         return rule
 
+    @api.depends(
+        "product_id",
+        "mrp_area_id",
+        "product_id.route_ids",
+        "location_proc_id",
+    )
     def _compute_supply_method(self):
         boms_by_product = self.env["mrp.bom"]._bom_find(self.mapped("product_id"))
         for rec in self:
