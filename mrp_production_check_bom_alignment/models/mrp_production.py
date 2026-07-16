@@ -177,3 +177,17 @@ class MrpProduction(models.Model):
                     "target": "new",
                 }
         return super().action_confirm()
+
+    def _get_move_raw_values(
+        self, product, product_uom_qty, product_uom, operation_id=False, bom_line=False
+    ):
+        vals = super()._get_move_raw_values(
+            product,
+            product_uom_qty,
+            product_uom,
+            operation_id=operation_id,
+            bom_line=bom_line,
+        )
+        if not vals.get("operation_id") and bom_line and bom_line.operation_id:
+            vals["operation_id"] = bom_line.operation_id.id
+        return vals

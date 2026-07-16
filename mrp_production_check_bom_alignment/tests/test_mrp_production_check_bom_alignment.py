@@ -274,3 +274,23 @@ class TestMrpProductionCheckBomAlignment(TransactionCase):
         )
         mo = self._create_ratio_mo(bom_qty=3.0, line_qty=1.0, mo_qty=1.0, uom=uom)
         self.assertFalse(mo._get_bom_alignment_error(mo.name))
+
+    def test_update_bom_keeps_operation_on_new_component_move(self):
+        mo = self._create_mo()
+        self.test_bom.bom_line_ids = [
+            Command.create(
+                {
+                    "product_id": self.component_3.id,
+                    "product_qty": 1.0,
+                    "operation_id": self.operation_1.id,
+                }
+            )
+        ]
+        self.assertTrue(mo.is_outdated_bom)
+        mo.action_update_bom()
+        new_move = mo.move_raw_ids.filtered(
+            lambda m: m.product_id == self.component_3 and m.state != "cancel"
+        )
+        self.assertTrue(new_move)
+        self.assertEqual(new_move.operation_id, self.operation_1)
+        self.assertFalse(mo._get_bom_alignment_error(mo.name))
