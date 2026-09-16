@@ -16,7 +16,10 @@ class PurchaseOrder(models.Model):
         store=True,
     )
 
-    @api.depends("order_line.move_ids.move_orig_ids.production_id.picking_ids.state")
+    @api.depends(
+        "order_line.move_ids.move_orig_ids.production_id.procurement_group_id."
+        "stock_move_ids.picking_id.state"
+    )
     def _compute_resupply_status(self):
         for order in self:
             resupplies = order._get_subcontracting_resupplies()

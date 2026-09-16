@@ -29,7 +29,11 @@ class StockPicking(models.Model):
                 picking._get_subcontracting_resupplies()
             )
 
-    @api.depends("move_ids", "move_ids.move_orig_ids.production_id.picking_ids.state")
+    @api.depends(
+        "move_ids",
+        "move_ids.move_orig_ids.production_id.procurement_group_id."
+        "stock_move_ids.picking_id.state",
+    )
     def _compute_resupply_status(self):
         for picking in self:
             resupplies = picking._get_subcontracting_resupplies()
