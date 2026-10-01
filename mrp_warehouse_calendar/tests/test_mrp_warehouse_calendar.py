@@ -43,7 +43,7 @@ class TestMrpWarehouseCalendar(TransactionCase):
             {
                 "product_id": self.product.id,
                 "product_tmpl_id": self.product.product_tmpl_id.id,
-                "product_uom_id": self.product.uom_id.id,
+                "uom_id": self.product.uom_id.id,
                 "product_qty": 1.0,
                 "type": "normal",
                 "produce_delay": 1,
@@ -53,6 +53,8 @@ class TestMrpWarehouseCalendar(TransactionCase):
             {"bom_id": self.bom.id, "product_id": self.product_2.id, "product_qty": 2}
         )
 
+        # In 20.0 the Manufacture route is not product selectable by default
+        self.manufacture_route.product_selectable = True
         self.product.route_ids = [(6, 0, self.manufacture_route.ids)]
 
     def test_procurement_with_calendar(self):
