@@ -87,8 +87,11 @@ class StockPicking(models.Model):
             picking.trigger_inspections(["after"])
         return res
 
-    def _create_backorder(self, backorder_moves=None):
-        res = super()._create_backorder(backorder_moves)
+    def _create_backorder(self, backorder_moves=None, from_manual_backorder=False):
+        res = super()._create_backorder(
+            backorder_moves=backorder_moves,
+            from_manual_backorder=from_manual_backorder,
+        )
         # To re-allocate backorder moves to the new backorder picking
         self.sudo().qc_inspections_ids._compute_picking()
         return res

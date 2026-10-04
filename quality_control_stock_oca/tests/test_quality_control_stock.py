@@ -11,6 +11,11 @@ from odoo.addons.quality_control_oca.tests.test_quality_control import (
 
 
 class TestQualityControlStockOca(TestQualityControlOcaBase):
+    _test_user_groups = (
+        *TestQualityControlOcaBase._test_user_groups,
+        "stock.group_stock_manager",
+    )
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -360,13 +365,18 @@ class TestQualityControlStockOca(TestQualityControlOcaBase):
         )
 
     def test_picking_type(self):
-        picking_type = self.picking_type_model.create(
-            {
-                "name": "Test Picking Type",
-                "code": "outgoing",
-                "sequence_code": self.picking_type.sequence_code,
-                "sequence_id": self.picking_type.sequence_id.id,
-            }
+        # The sequence of the picking type requires admin rights
+        picking_type = (
+            self.picking_type_model.sudo()
+            .create(
+                {
+                    "name": "Test Picking Type",
+                    "code": "outgoing",
+                    "sequence_code": self.picking_type.sequence_code,
+                    "sequence_id": self.picking_type.sequence_id.id,
+                }
+            )
+            .sudo(False)
         )
         trigger = self.qc_trigger_model.search(
             [("picking_type_id", "=", picking_type.id)]

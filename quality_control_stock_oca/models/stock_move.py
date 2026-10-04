@@ -64,20 +64,22 @@ class StockMove(models.Model):
             inspection = inspection_model._make_inspection(
                 self, trigger_line, date=date
             )
-            if self.product_id.tracking != "none":
-                if trigger_line.trigger.inspection_per_lot:
-                    move_lines = self.move_line_ids
-                    for move_line in move_lines:
-                        inspection.write(
-                            {
-                                "lot_id": move_line.lot_id and move_line.lot_id.id,
-                                "qty": move_line.quantity,
-                            }
-                        )
-                        if move_line != move_lines[-1]:
-                            inspection = inspection.copy()
-                            inspection.set_test(trigger_line)
-                            inspection.action_todo()
+            if (
+                self.product_id.tracking != "none"
+                and trigger_line.trigger.inspection_per_lot
+            ):
+                move_lines = self.move_line_ids
+                for move_line in move_lines:
+                    inspection.write(
+                        {
+                            "lot_id": move_line.lot_id and move_line.lot_id.id,
+                            "qty": move_line.quantity,
+                        }
+                    )
+                    if move_line != move_lines[-1]:
+                        inspection = inspection.copy()
+                        inspection.set_test(trigger_line)
+                        inspection.action_todo()
 
     def _action_confirm(self, merge=True, merge_into=False, create_proc=True):
         moves = super()._action_confirm(
