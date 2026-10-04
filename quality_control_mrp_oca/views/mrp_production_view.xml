@@ -11,7 +11,7 @@
             name="context"
         >{'default_object_id': 'mrp.production,' + active_id}</field>
     </record>
-    <record model="ir.ui.view" id="mrp_production_qc_view">
+    <record id="mrp_production_qc_view" model="ir.ui.view">
         <field name="name">mrp.production.form.qc</field>
         <field name="model">mrp.production</field>
         <field name="inherit_id" ref="mrp.mrp_production_form_view" />
