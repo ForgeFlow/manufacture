@@ -58,9 +58,10 @@ class QcInspection(models.Model):
         """Overriden for getting the product from a stock move."""
         res = super()._compute_product_id()
         for inspection in self.filtered("object_id"):
-            if inspection.object_id._name == "stock.move":
-                inspection.product_id = inspection.object_id.product_id
-            elif inspection.object_id._name == "stock.lot":
+            if (
+                inspection.object_id._name == "stock.move"
+                or inspection.object_id._name == "stock.lot"
+            ):
                 inspection.product_id = inspection.object_id.product_id
         return res
 
