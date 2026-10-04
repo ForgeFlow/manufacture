@@ -10,6 +10,12 @@ from odoo.addons.quality_control_oca.tests.test_quality_control import (
 
 
 class TestQualityControlMrp(TestQualityControlOcaBase):
+    _test_user_groups = (
+        *TestQualityControlOcaBase._test_user_groups,
+        "stock.group_stock_manager",
+        "mrp.group_mrp_manager",
+    )
+
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
@@ -116,6 +122,6 @@ class TestQualityControlMrp(TestQualityControlOcaBase):
 
     def test_qc_inspection_mo(self):
         self.inspection1.write(
-            {"object_id": "%s,%d" % (self.production1._name, self.production1.id)}
+            {"object_id": f"{self.production1._name},{self.production1.id}"}
         )
         self.assertEqual(self.inspection1.production_id, self.production1)
