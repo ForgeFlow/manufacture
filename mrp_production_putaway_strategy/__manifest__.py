@@ -6,7 +6,7 @@
     "summary": "Applies putaway strategies to manufacturing orders for "
     "finished products.",
     "version": "18.0.1.0.0",
-    "author": "ForgeFlow, " "Odoo Community Association (OCA)",
+    "author": "ForgeFlow, Odoo Community Association (OCA)",
     "website": "https://github.com/OCA/manufacture",
     "category": "Manufacture",
     "depends": ["mrp"],
