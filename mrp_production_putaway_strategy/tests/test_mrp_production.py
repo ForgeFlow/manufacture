@@ -1,14 +1,15 @@
 # Copyright 2017-18 ForgeFlow S.L.
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-from odoo.tests.common import TransactionCase
+from odoo.addons.base.tests.common import BaseCommon
 
 
-class MrpProductionCase(TransactionCase):
-    def setUp(self, *args, **kwargs):
-        super().setUp(*args, **kwargs)
+class MrpProductionCase(BaseCommon):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
 
-        self.warehouse = self.env["stock.warehouse"].create(
+        cls.warehouse = cls.env["stock.warehouse"].create(
             {
                 "name": "X Warehouse",
                 "code": "X WH",
@@ -17,25 +18,37 @@ class MrpProductionCase(TransactionCase):
             }
         )
 
-        self.category = self.env["product.category"].create({"name": "Test"})
+        cls.category = cls.env["product.category"].create({"name": "Test"})
 
-        self.loc_stock = self.warehouse.lot_stock_id
-        self.bin_loc_stock = self.env["stock.location"].create(
-            {"name": "Bin 1", "location_id": self.loc_stock.id, "usage": "internal"}
+        cls.loc_stock = cls.warehouse.lot_stock_id
+        cls.bin_loc_stock = cls.env["stock.location"].create(
+            {"name": "Bin 1", "location_id": cls.loc_stock.id, "usage": "internal"}
         )
 
-        self.product1 = self.env.ref("mrp.product_product_computer_desk")
-        self.product1.categ_id = self.category
-        self.bom1 = self.env.ref("mrp.mrp_bom_desk")
-
-        self.putaway_strategy = self.env["stock.putaway.rule"].create(
+        cls.product1 = cls.env["product.product"].create(
+            {"name": "Test Desk", "is_storable": True, "categ_id": cls.category.id}
+        )
+        cls.component1 = cls.env["product.product"].create(
+            {"name": "Test Component", "is_storable": True}
+        )
+        cls.bom1 = cls.env["mrp.bom"].create(
             {
-                "product_id": self.product1.id,
-                "location_in_id": self.loc_stock.id,
-                "location_out_id": self.bin_loc_stock.id,
+                "product_tmpl_id": cls.product1.product_tmpl_id.id,
+                "product_qty": 1.0,
+                "bom_line_ids": [
+                    (0, 0, {"product_id": cls.component1.id, "product_qty": 1.0})
+                ],
             }
         )
-        self.loc_stock.putaway_rule_ids = self.putaway_strategy
+
+        cls.putaway_strategy = cls.env["stock.putaway.rule"].create(
+            {
+                "product_id": cls.product1.id,
+                "location_in_id": cls.loc_stock.id,
+                "location_out_id": cls.bin_loc_stock.id,
+            }
+        )
+        cls.loc_stock.putaway_rule_ids = cls.putaway_strategy
 
     def _create_mo(
         self,

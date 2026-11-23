@@ -1,7 +1,7 @@
 # Copyright 2017-18 ForgeFlow S.L.
 # License AGPL-3.0 or later (https://www.gnu.org/licenses/agpl.html).
 
-from odoo import _, api, models
+from odoo import api, models
 
 
 class MrpProduction(models.Model):
@@ -30,11 +30,11 @@ class MrpProduction(models.Model):
         for mo, applied in zip(mos, putaway_applied_flags, strict=False):
             if applied:
                 mo.message_post(
-                    body=_(
+                    body=self.env._(
                         "Applied Putaway strategy to finished products.\n"
-                        "Finished Products Location: %s."
-                    )
-                    % mo.location_dest_id.complete_name,
+                        "Finished Products Location: %s.",
+                        mo.location_dest_id.complete_name,
+                    ),
                     message_type="comment",
                 )
 
